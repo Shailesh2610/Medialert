@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New Treatment Plan - MediAlert</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="mainPage.html" class="nav-brand"><i class="fa-solid fa-pills"></i> MediAlert</a>
+            <div>
+                <a href="#" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+    <main class="container main-content">
+        <div class="form-box animated" style="max-width: 700px; padding: 2.5rem; margin: 0 auto;">
+            <h2><i class="fa-solid fa-file-medical"></i> New Treatment Plan</h2>
+            <form id="treatment-form">
+                <div class="input-group">
+                    <input type="text" id="treatment-name" placeholder="Treatment Name (e.g., Flu Recovery)" required>
+                </div>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <div class="input-wrapper">
+                        <label>Start Date</label>
+                        <input type="date" id="start-date" required>
+                    </div>
+                    <div class="input-wrapper">
+                        <label>End Date</label>
+                        <input type="date" id="end-date" required>
+                    </div>
+                </div>
+                <h3 class="medicines-title">Medicines in this Plan</h3>
+                <div id="medicines-container"></div>
+                <button type="button" id="add-medicine-btn" class="btn btn-secondary" style="width: 100%; margin: 1rem 0;">
+                    <i class="fa-solid fa-plus"></i> Add Medicine
+                </button>
+                <hr class="form-divider">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Treatment Plan</button>
+            </form>
+        </div>
+    </main>
+    <template id="medicine-row-template">
+        <div class="medicine-entry-card">
+            <div class="card-header">
+                <span class="row-number"></span>
+                <button type="button" class="remove-medicine-btn" title="Remove"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="form-grid">
+                <div class="input-wrapper full-width">
+                    <label>Medicine Name</label>
+                    <input type="text" class="med-name" required>
+                </div>
+                <div class="input-wrapper">
+                    <label>Dosage</label>
+                    <div class="dose-group" style="display: flex; gap: 0.5rem;">
+                        <input type="number" class="med-amount" placeholder="Qty" required style="flex: 1;">
+                        <select class="med-unit" style="flex: 2;">
+                            <option>tablet(s)</option>
+                            <option>ml</option>
+                            <option>mg</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-wrapper">
+                    <label>Meal Relation</label>
+                    <select class="med-meal-relation">
+                        <option>After Meal</option>
+                        <option>Before Meal</option>
+                        <option>Anytime</option>
+                    </select>
+                </div>
+                <div class="input-wrapper">
+                    <label>Specific Time</label>
+                    <input type="time" class="med-time" required>
+                </div>
+            </div>
+        </div>
+    </template>
+  <script>
+    // Define the API URL for all front-end fetch calls
+    const API_BASE_URL = 'http://localhost:3000'; 
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const userJSON = sessionStorage.getItem('medialert_user');
+        let user = null;
+        if (userJSON) {
+            try {
+                user = JSON.parse(userJSON);
+            } catch (e) {}
+        }
+        
+        // Basic user check
+        if (!user || !user.id) {
+            // window.location.href = 'login.html';
+            // return;
+        }
+
+        const addMedicineBtn = document.getElementById("add-medicine-btn");
+        const medicinesContainer = document.getElementById("medicines-container");
+        const template = document.getElementById("medicine-row-template");
+        const form = document.getElementById("treatment-form");
+        const logoutBtn = document.getElementById('logout-btn');
+
+        // Add one medicine row by default
+        addMedicineRow(); 
+        
+        addMedicineBtn.addEventListener("click", addMedicineRow);
+        
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            sessionStorage.removeItem('medialert_user');
+            window.location.href = 'login.html';
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Get all dynamically added medicine cards
+            const medicineCards = medicinesContainer.querySelectorAll('.medicine-entry-card');
+            let medicines = [], formIsValid = true;
+
+            medicineCards.forEach(card => {
+                const medicine = {
+                    name: card.querySelector('.med-name').value,
+                    qty: card.querySelector('.med-amount').value,
+                    unit: card.querySelector('.med-unit').value,
+                    mealRelation: card.querySelector('.med-meal-relation').value,
+                    time: card.querySelector('.med-time').value
+                };
+                if (!medicine.name || !medicine.qty || !medicine.time) formIsValid = false;
+                medicines.push(medicine);
+            });
+
+            // 1. Build the final payload
+            const payload = {
+                userId: user ? user.id : 1, // Use a placeholder if user is missing for testing
+                treatmentName: document.getElementById('treatment-name').value,
+                startDate: document.getElementById('start-date').value,
+                endDate: document.getElementById('end-date').value,
+                medicines
+            };
+
+            if (!payload.treatmentName || !payload.startDate || !payload.endDate || medicines.length === 0) {
+                alert('Please provide a treatment name, duration, and at least one medicine.');
+                return;
+            }
+            if (!formIsValid) {
+                alert('Please fill out all required fields for each medicine.');
+                return;
+            }
+
+            try {
+                // 2. Send data to the new API endpoint
+                const response = await fetch(`${API_BASE_URL}/api/treatments`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                // 3. Handle response
+                if (response.ok) {
+                    alert(result.message);
+                    window.location.href = 'dashboard.html'; // Redirect to dashboard
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                alert('Could not connect to the server.');
+            }
+        });
+
+        function addMedicineRow() {
+            const clone = template.content.cloneNode(true);
+            medicinesContainer.appendChild(clone);
+            updateRowNumbers();
+            medicinesContainer.lastElementChild.querySelector(".remove-medicine-btn").addEventListener("click", function () {
+                this.closest('.medicine-entry-card').remove();
+                updateRowNumbers();
+            });
+        }
+
+        function updateRowNumbers() {
+            medicinesContainer.querySelectorAll(".medicine-entry-card").forEach((card, index) => {
+                card.querySelector(".row-number").textContent = `Medicine #${index + 1}`;
+            });
+        }
+    });
+</script>
+</body>
+</html>

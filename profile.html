@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile & History - MediAlert</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="mainPage.html" class="nav-brand"><i class="fa-solid fa-pills"></i> MediAlert</a>
+            <div>
+                <a href="#" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+    <main class="container main-content">
+        <!-- Section 1: Personal Details -->
+        <section class="animated">
+            <header class="page-header">
+                <h1>My Profile</h1>
+            </header>
+            <div class="profile-card" id="profile-details-card">
+                <div id="profile-details">
+                    <p>Loading profile...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Medical History (Illnesses) -->
+        <section class="animated" style="animation-delay: 0.2s;">
+            <header class="page-header" style="margin-top: 4rem;">
+                <h2>Medical History (Illnesses)</h2>
+            </header>
+            <div class="card" style="text-align: left;">
+                <h3 style="text-align:center; margin-bottom: 1.5rem;">Add New Illness Record</h3>
+                <form id="illness-form" class="form-box" style="padding: 0; box-shadow: none; max-width: none;">
+                    <div class="input-group">
+                        <input type="text" id="illness-name" placeholder="Illness/Condition Name" required>
+                    </div>
+                    <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                        <div class="input-wrapper">
+                            <label>Start Date</label>
+                            <input type="date" id="illness-start" required>
+                        </div>
+                        <div class="input-wrapper">
+                            <label>End Date (Optional)</label>
+                            <input type="date" id="illness-end">
+                        </div>
+                    </div>
+                    <textarea id="illness-notes" placeholder="Notes (e.g., symptoms, doctor visit)..." style="margin-top: 1.5rem;"></textarea>
+                    <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Add to History</button>
+                </form>
+            </div>
+            <div class="table-container" style="margin-top: 1.5rem;">
+                <table class="styled-table">
+                    <thead id="illness-history-head"></thead>
+                    <tbody id="illness-history-body"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 3: Medication Log -->
+        <section class="animated" style="animation-delay: 0.4s;">
+            <header class="page-header" style="margin-top: 4rem;">
+                <h2>Medication Log</h2>
+            </header>
+            <div class="table-container">
+                <table class="styled-table">
+                    <thead id="med-log-head"></thead>
+                    <tbody id="med-log-body"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+const API_BASE_URL='http://localhost:3000';
+        document.addEventListener("DOMContentLoaded", () => {
+            const user = JSON.parse(sessionStorage.getItem('medialert_user'));
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Get all element references
+            const profileDetails = document.getElementById('profile-details');
+            const illnessHistoryHead = document.getElementById('illness-history-head');
+            const illnessHistoryBody = document.getElementById('illness-history-body');
+            const medLogHead = document.getElementById('med-log-head');
+            const medLogBody = document.getElementById('med-log-body');
+            const logoutBtn = document.getElementById('logout-btn');
+            const illnessForm = document.getElementById('illness-form');
+
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                sessionStorage.removeItem('medialert_user');
+                window.location.href = 'login.html';
+            });
+
+            // --- Main Data Fetching Function ---
+            async function fetchData() {
+                try {
+                    // Fetch Personal Details
+                    const profileResponse = await fetch(`${API_BASE_URL}/api/profile/${user.id}`);
+                    const profileData = await profileResponse.json();
+                    if (profileResponse.ok) {
+                        renderProfile(profileData);
+                    } else {
+                        alert(`Error fetching profile: ${profileData.message}`);
+                    }
+
+                    // Fetch Medical History (Illnesses + Medication Log)
+                    const historyResponse = await fetch(`${API_BASE_URL}/api/medical-history/${user.id}`);
+                    const historyData = await historyResponse.json();
+                    if (historyResponse.ok) {
+                        renderIllnessHistory(historyData.illness_history);
+                        renderMedicationLog(historyData.medication_log);
+                    } else {
+                        alert(`Error fetching history: ${historyData.message}`);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch data:", error);
+                    alert("Could not connect to the server to fetch your data.");
+                }
+            }
+
+            // --- Rendering Functions ---
+            function renderProfile(details) {
+                if (!details) return;
+                profileDetails.innerHTML = `
+                    <div class="profile-item"><strong>Name:</strong> <span>${details.name}</span></div>
+                    <div class="profile-item"><strong>Email:</strong> <span>${details.email}</span></div>
+                    <div class="profile-item"><strong>Age:</strong> <span>${details.age}</span></div>
+                    <div class="profile-item"><strong>Gender:</strong> <span>${details.gender}</span></div>
+                `;
+            }
+
+            function renderIllnessHistory(history) {
+                illnessHistoryHead.innerHTML = '<tr><th>Illness/Condition</th><th>Start Date</th><th>End Date</th><th>Notes</th><th>Action</th></tr>';
+                illnessHistoryBody.innerHTML = '';
+                if (!history || history.length === 0) {
+                    illnessHistoryBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No illness history recorded.</td></tr>';
+                    return;
+                }
+                history.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${entry.illness_name}</td>
+                        <td>${new Date(entry.start_date).toLocaleDateString()}</td>
+                        <td>${entry.end_date ? new Date(entry.end_date).toLocaleDateString() : 'Ongoing'}</td>
+                        <td>${entry.notes || '—'}</td>
+                        <td><button class="btn btn-danger" data-id="${entry.id}">Delete</button></td>
+                    `;
+                    illnessHistoryBody.appendChild(row);
+                });
+                illnessHistoryBody.querySelectorAll('.btn-danger').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        if (confirm('Are you sure you want to delete this entry?')) {
+                            await deleteIllnessEntry(btn.dataset.id);
+                        }
+                    });
+                });
+            }
+
+            function renderMedicationLog(log) {
+                medLogHead.innerHTML = '<tr><th>Date & Time Taken</th><th>Medicine</th><th>Dosage</th><th>Side Effect Notes</th></tr>';
+                medLogBody.innerHTML = '';
+                if (!log || log.length === 0) {
+                    medLogBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">No medication log found.</td></tr>';
+                    return;
+                }
+                log.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${new Date(entry.taken_at).toLocaleString()}</td>
+                        <td>${entry.medicine_name}</td>
+                        <td>${entry.dosage_qty} ${entry.dosage_unit}</td>
+                        <td>${entry.side_effects_note || '—'}</td>
+                    `;
+                    medLogBody.appendChild(row);
+                });
+            }
+
+            // --- Event Handlers ---
+            illnessForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const payload = {
+                    userId: user.id,
+                    illnessName: document.getElementById('illness-name').value,
+                    startDate: document.getElementById('illness-start').value,
+                    endDate: document.getElementById('illness-end').value || null,
+                    notes: document.getElementById('illness-notes').value
+                };
+
+                if (!payload.illnessName || !payload.startDate) {
+                    alert("Please provide at least an illness name and start date.");
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/illness-history', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) {
+                        illnessForm.reset();
+                        fetchData(); // Refresh all data on the page
+                    } else {
+                        alert(`Error: ${(await response.json()).message}`);
+                    }
+                } catch (error) {
+                    alert("Failed to add illness history.");
+                }
+            });
+
+            async function deleteIllnessEntry(id) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/illness-history/${id}`, { method: 'DELETE' });
+                    if (response.ok) {
+                        fetchData(); // Refresh all data on the page
+                    } else {
+                        alert(`Error: ${(await response.json()).message}`);
+                    }
+                } catch (error) {
+                    alert("Failed to delete entry.");
+                }
+            }
+
+            // Initial data load
+            fetchData();
+        });
+    </script>
+</body>
+</html>

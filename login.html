@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login - MediAlert</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="auth-layout">
+        <div class="auth-visual">
+            <h2>Your Health, On Time.</h2>
+        </div>
+        <div class="auth-form-container">
+            <form id="login-form" class="form-box animated">
+                <h3>Welcome Back!</h3>
+                <p class="subtitle">Login to continue to your dashboard.</p>
+                <div class="input-group">
+                    <input type="email" id="login-email" placeholder="Email Address" required>
+                </div>
+               <div class="input-group password-box">
+    <input type="password" id="login-password" placeholder="Password" required>
+    <i class="fa-solid fa-eye" id="togglePassword"></i>
+</div>
+
+                <a href="forgotPass.html" class="forgot-link">Forgot password?</a>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <p class="form-link">Don't have an account? <a href="signup.html">Sign up here</a></p>
+            </form>
+        </div>
+    </div>
+    <script>
+    // Define the API URL for all front-end fetch calls
+    const API_BASE_URL = 'http://localhost:3000'; 
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+
+        try {
+            // 1. Send credentials to the API
+            const response = await fetch(`${API_BASE_URL}/api/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            const result = await response.json();
+
+            // 2. Handle response
+            if (response.ok) {
+                // Save user details to sessionStorage
+                sessionStorage.setItem('medialert_user', JSON.stringify(result.user));
+                
+                alert('Login Successful!');
+                window.location.href = 'mainPage.html'; 
+            } else {
+                alert('Login Failed: ' + result.message);
+            }
+        } catch (error) {
+            alert('Network Error: Could not connect to the API server. Is the server running?');
+        }
+
+    });
+   
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("login-password");
+
+    togglePassword.addEventListener("click", () => {
+        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+        passwordInput.setAttribute("type", type);
+
+        // Toggle eye icon
+        togglePassword.classList.toggle("fa-eye");
+        togglePassword.classList.toggle("fa-eye-slash");
+    });
+
+
+</script>
+</body>
+
+</html>

@@ -1,0 +1,644 @@
+/* --- MediAlert 2.0 UI Overhaul (Final) --- */
+
+/* 1. VARIABLES, FONTS & GLOBAL RESETS */
+:root {
+    --color-primary: #3d5af1;
+    --color-primary-dark: #304ffe;
+    --color-accent: #00bcd4;
+    --color-success: #4caf50;
+    --color-danger: #f44336;
+    --color-dark: #212121;
+    --color-grey: #757575;
+    --color-light-grey: #f5f5f5;
+    --color-white: #ffffff;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.12);
+    --border-radius: 12px;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--color-dark);
+    line-height: 1.6;
+    background-color: var(--color-light-grey);
+    -webkit-font-smoothing: antialiased;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
+
+/* 2. ANIMATIONS */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.animated {
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+/* 3. NAVIGATION BAR */
+.navbar {
+    background-color: var(--color-white);
+    padding: 1rem 0;
+    box-shadow: var(--shadow-md);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.brand i {
+    margin-right: 0.5rem;
+    color: var(--color-accent);
+    transform: rotate(-15deg);
+}
+
+.navbar a {
+    color: var(--color-dark);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    border-radius: 8px;
+}
+
+.navbar a:hover {
+    background-color: var(--color-light-grey);
+    color: var(--color-primary);
+}
+
+/* 4. BUTTONS */
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.6rem;
+    text-decoration: none;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--color-primary), var(--color-primary-dark));
+    color: var(--color-white);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background-color: #e0e0e0;
+    color: var(--color-dark);
+}
+
+.btn-secondary:hover {
+    background-color: #bdbdbd;
+}
+
+.btn-danger {
+    background-color: var(--color-danger);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+.btn-danger:hover {
+    background-color: #d32f2f;
+}
+
+.btn-take {
+    width: 100%;
+    margin-top: 1rem;
+    background-color: var(--color-accent);
+    color: var(--color-white);
+}
+
+.btn-take:hover {
+    background-color: #00acc1;
+}
+
+.btn-take:disabled {
+    background-color: var(--color-success);
+    cursor: not-allowed;
+    opacity: 0.9;
+}
+
+.btn-take:disabled i {
+    margin-right: 0.5rem;
+}
+
+/* 5. FORMS & AUTH LAYOUT */
+.auth-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.auth-visual {
+    flex: 1.2;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background: linear-gradient(45deg, var(--color-primary), var(--color-accent));
+    color: var(--color-white);
+}
+
+@media (min-width: 992px) {
+    .auth-visual {
+        display: flex;
+    }
+}
+
+.auth-form-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+}
+
+.form-box {
+    width: 100%;
+    max-width: 450px;
+    padding: 3rem;
+    background-color: var(--color-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+}
+
+.form-box h3 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.form-box .subtitle {
+    color: var(--color-grey);
+    margin-bottom: 2.5rem;
+    text-align: center;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.input-group input,
+.input-group select,
+textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.input-group input:focus,
+.input-group select:focus,
+textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 4px rgba(61, 90, 241, 0.1);
+}
+
+.form-link {
+    text-align: center;
+    margin-top: 1.5rem;
+}
+
+.form-link a {
+    font-weight: 600;
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.forgot-link {
+    text-align: right;
+    display: block;
+    margin-top: -0.75rem;
+    margin-bottom: 1.5rem;
+    text-decoration: none;
+    color: var(--color-primary);
+    font-size: 0.9rem;
+}
+
+/* 6. GENERAL LAYOUT & CARDS */
+.main-content {
+    padding: 4rem 0;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}/* --- 6. GENERAL LAYOUT & CARDS (MODIFIED FOR UNIFIED DESIGN) --- */
+
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Base style for ALL cards (Clean White Background) */
+.card {
+    background-color: var(--color-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+    text-align: center;
+    text-decoration: none;
+    color: var(--color-dark);
+    /* Add a subtle border to make them stand out slightly */
+    border: 1px solid #eee; 
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--color-primary); /* Interactive border highlight on hover */
+}
+
+/* Style for icons and text to be consistent across all cards */
+.card i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--color-primary); /* Primary color for all icons */
+    transition: color 0.3s;
+}
+
+.card h2 {
+    font-size: 1.5rem;
+    color: var(--color-dark);
+}
+
+.card p {
+    color: var(--color-grey);
+}
+
+
+/* 🛑 REMOVE PRIMARY-ACTION STYLES!
+   We keep the selector but reset its custom styles 
+   to ensure the 'View Today's Schedule' card looks exactly the same. */
+.card.primary-action {
+    background: var(--color-white); /* Reset to white */
+    color: var(--color-dark);       /* Reset text color */
+}
+
+.card.primary-action i,
+.card.primary-action h2,
+.card.primary-action p {
+    color: var(--color-primary); /* Ensure icon and title use primary color */
+}
+
+/* 7. TABLES & PROFILE */
+.table-container,
+.profile-card {
+    background: var(--color-white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.styled-table thead tr {
+    background-color: var(--color-light-grey);
+    text-align: left;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 1rem;
+}
+
+.styled-table tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.styled-table tbody tr:last-of-type {
+    border-bottom: none;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #fafafa;
+}
+
+.profile-card {
+    padding: 2.5rem;
+    text-align: left;
+}
+
+.profile-item {
+    display: flex;
+    align-items: center;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-item:last-child {
+    border-bottom: none;
+}
+
+.profile-item strong {
+    min-width: 120px;
+    color: var(--color-grey);
+}
+
+/* 8. MODAL */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: white;
+    padding: 2.5rem;
+    border-radius: var(--border-radius);
+    max-width: 450px;
+    width: 90%;
+    text-align: center;
+    animation: fadeInUp 0.4s ease-out;
+}
+
+.modal-content textarea {
+    width: 100%;
+    min-height: 100px;
+    margin: 1.5rem 0;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    resize: vertical;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+/* 9. ADD-TREATMENT FORM SPECIFIC STYLES */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.input-wrapper.full-width {
+    grid-column: 1 / -1;
+}
+
+.medicines-title {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin: 1.5rem 0 1rem;
+    text-align: center;
+}
+
+#medicines-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.medicine-entry-card {
+    background-color: #fdfdfd;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    animation: fadeInUp 0.5s ease;
+}
+
+.medicine-entry-card .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.remove-medicine-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-grey);
+    font-size: 1.2rem;
+}
+
+.remove-medicine-btn:hover {
+    color: var(--color-danger);
+}
+
+hr.form-divider {
+    border: 0;
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 2rem 0;
+}
+/* ---------------------------------------------------------------------
+   9. ADD-TREATMENT FORM SPECIFIC STYLES (MODIFIED FOR UX)
+--------------------------------------------------------------------- */
+
+/* Title separating the main plan from medicines */
+.medicines-title {
+    font-size: 1.6rem; /* Slightly larger title */
+    font-weight: 600;
+    margin: 2rem 0 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-accent); /* Highlight with accent color */
+    color: var(--color-dark);
+    text-align: left; /* Align to the left of the form */
+}
+
+/* Container for all dynamic medicine cards */
+#medicines-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem; /* Good space between each medicine entry */
+}
+
+/* Individual Medicine Entry Card Styling (The core of the UX improvement) */
+.medicine-entry-card {
+    background-color: var(--color-light-grey);
+    border: 1px solid #e0e0e0;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden; /* To contain the focus border effect */
+}
+
+/* Optional: Add a subtle glow when the card is hovered over */
+.medicine-entry-card:hover {
+    border-color: var(--color-primary);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #cfcfcf; /* Clear separation line */
+}
+
+/* Style for the 'Medicine #1' label */
+.row-number {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--color-primary);
+}
+
+/* Style for the small 'Remove' button (X icon) */
+.remove-medicine-btn {
+    background: none;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--color-grey);
+    font-size: 1.1rem;
+    padding: 0.4rem;
+    transition: all 0.3s ease;
+}
+
+.remove-medicine-btn:hover {
+    color: var(--color-danger);
+    background-color: #ffebee; /* Light red background on hover */
+    border-color: var(--color-danger);
+    transform: rotate(90deg);
+}
+
+/* Grid for inputs inside the card (inherited from global styles) */
+.form-grid {
+    /* Ensures fields wrap nicely on small screens */
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); 
+    gap: 1.2rem;
+}
+
+/* Styling for the Dosage input group (Qty and Unit selector) */
+.dose-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.dose-group input.med-amount {
+    flex: 1; /* Quantity takes less space */
+    text-align: center;
+}
+
+.dose-group select.med-unit {
+    flex: 2; /* Unit selector takes more space for text */
+}
+
+/* Style for the button that adds new medicine entries */
+#add-medicine-btn {
+    background-color: var(--color-accent);
+    color: var(--color-white);
+    padding: 1rem;
+    font-size: 1.1rem;
+    margin: 1.5rem 0;
+}
+
+#add-medicine-btn:hover {
+    background-color: #00acc1; /* Darken accent color on hover */
+}
+
+/* Divider Line */
+hr.form-divider {
+    border: 0;
+    height: 1px;
+    background-color: var(--color-light-grey);
+    margin: 3rem 0 2rem;
+}
+
+/* Label fix for the date/time inputs */
+.input-wrapper label {
+    font-weight: 500;
+    color: var(--color-grey);
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+    display: block;
+}
+.password-box {
+    position: relative;
+}
+
+.password-box i {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+}
+
+.password-box i:hover {
+    color: #000;
+}

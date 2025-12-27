@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MediAlert - Your Health, On Time</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+        *{
+            font-family: "Poppins", sans-serif;
+        }
+        .hero-section {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: white;
+            background: linear-gradient(rgba(61, 90, 241, 0.8), rgba(0, 188, 212, 0.8)), url('https://placehold.co/1920x1080/cccccc/333333?text=Health') no-repeat center center/cover;
+        }
+        .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        .hero-content p {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/" class="nav-brand"><i class="fa-solid fa-pills"></i> MediAlert</a>
+            <div>
+                <a href="login.html">Login</a>
+                <a href="signup.html" class="btn btn-primary" style="margin-left: 0.5rem;">Sign Up</a>
+            </div>
+        </div>
+    </nav>
+    <header class="hero-section">
+        <div class="container hero-content animated">
+            <h1>Your Health, On Time, Every Time.</h1>
+            <p>Never miss a dose again. MediAlert is your simple, reliable partner in managing your medication schedule.</p>
+            <a href="signup.html" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.2rem;">Get Started for Free</a>
+        </div>
+    </header>
+    <main class="container main-content">
+        <header class="page-header animated">
+            <h2>How It Works</h2>
+        </header>
+        <div class="action-grid">
+            <div class="card animated" style="animation-delay: 0.2s;">
+                <i class="fa-solid fa-plus-circle"></i>
+                <h2>1. Create a Treatment Plan</h2>
+                <p>Quickly add your treatment name, its duration, and all the required medicines with their schedules.</p>
+            </div>
+            <div class="card animated" style="animation-delay: 0.4s;">
+                <i class="fa-solid fa-calendar-day"></i>
+                <h2>2. View Your Daily Schedule</h2>
+                <p>Get a clear view of the medicines you need to take today on your personal dashboard.</p>
+            </div>
+            <div class="card animated" style="animation-delay: 0.6s;">
+                <i class="fa-solid fa-check-double"></i>
+                <h2>3. Log Your Intake</h2>
+                <p>Mark each dose as taken and optionally add notes about side effects to build your health log.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

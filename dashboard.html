@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Dashboard - MediAlert</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="mainPage.html" class="nav-brand"><i class="fa-solid fa-pills"></i> MediAlert</a>
+            <div>
+                <a href="#" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+    <main class="container main-content">
+        <header class="page-header animated">
+            <h1>Today's Reminders</h1>
+            <p>Here are the medicines you need to take today. Mark them as you take them.</p>
+        </header>
+        <div id="reminders-container" class="action-grid">
+            <p>Loading today's schedule...</p>
+        </div>
+    </main>
+    <div id="note-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3>Log Medicine Intake</h3>
+            <p>Did you experience any side effects or have any notes?</p>
+            <textarea id="side-effect-note" placeholder="e.g., felt a bit dizzy... (optional)"></textarea>
+            <div class="modal-actions">
+                <button id="modal-cancel" class="btn btn-secondary">Cancel</button>
+                <button id="modal-confirm" class="btn btn-primary">Confirm & Log</button>
+            </div>
+        </div>
+    </div>
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        // 🛠️ CRITICAL FIX: Define the base URL for your Node.js API
+        const API_BASE_URL = 'http://localhost:3000'; 
+
+        const userJSON = sessionStorage.getItem('medialert_user');
+        let user = null;
+        if (userJSON) {
+            try {
+                user = JSON.parse(userJSON);
+            } catch (e) {
+                console.error("Failed to parse user data.", e);
+            }
+        }
+        
+        // Ensure user is logged in
+        if (!user || !user.id) { 
+            window.location.href = 'login.html'; 
+            return;
+        }
+
+        const remindersContainer = document.getElementById("reminders-container");
+        const logoutBtn = document.getElementById('logout-btn');
+        const noteModal = document.getElementById('note-modal');
+        const noteTextarea = document.getElementById('side-effect-note');
+        const modalCancel = document.getElementById('modal-cancel');
+        const modalConfirm = document.getElementById('modal-confirm');
+        let currentMedicineId = null;
+
+        // --- Logout Handler ---
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            sessionStorage.removeItem('medialert_user');
+            window.location.href = 'login.html';
+        });
+
+        // --- Data Fetcher ---
+        async function fetchAndDisplayReminders() {
+            if (!user || !user.id) {
+                 remindersContainer.innerHTML = '<p class="error-msg">User data missing. Please log in again.</p>';
+                 return;
+            }
+            try {
+                // ✅ FIXED: Using the full API_BASE_URL for the GET request
+                const response = await fetch(`${API_BASE_URL}/api/dashboard/${user.id}`); 
+                const reminders = await response.json();
+                
+                if (!response.ok) {
+                    // Handle API errors (e.g., 500 server error)
+                    throw new Error(reminders.message || 'Failed to fetch schedule.');
+                }
+                
+                displayReminders(reminders);
+            } catch (error) {
+                console.error("Dashboard fetch error:", error);
+                // Display the user-friendly connection error message
+                remindersContainer.innerHTML = `<p class="error-msg">Could not connect to the server or retrieve schedule.</p>`;
+            }
+        }
+
+        // --- UI Renderer ---
+        function displayReminders(reminders) {
+            remindersContainer.innerHTML = '';
+            if (reminders.length === 0) {
+                remindersContainer.innerHTML = '<p>You have no medications scheduled for today. Check your treatment plans!</p>';
+                return;
+            }
+            // ... (Rest of rendering logic for cards remains the same)
+            reminders.forEach((med, index) => {
+                const card = document.createElement("div");
+                card.className = `card animated ${med.is_taken_today ? 'taken' : ''}`;
+                card.style.animationDelay = `${index * 0.1}s`;
+                
+                const time = new Date(`1970-01-01T${med.specific_time}`);
+                const formattedTime = time.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                card.innerHTML = `
+                    <i class="fa-solid fa-pills"></i>
+                    <h2>${med.medicine_name}</h2>
+                    <p><strong>Dose:</strong> ${med.dosage_qty} ${med.dosage_unit}</p>
+                    <p><strong>Time:</strong> ${formattedTime}</p>
+                    <p><small>Plan: ${med.treatment_name}</small></p>
+                    <button class="btn btn-take" data-med-id="${med.medicine_id}" ${med.is_taken_today ? 'disabled' : ''}>
+                        ${med.is_taken_today ? '<i class="fa-solid fa-check"></i> Taken' : 'Mark as Taken'}
+                    </button>
+                `;
+                remindersContainer.appendChild(card);
+            });
+            
+            // Set up click listeners for the 'Mark as Taken' buttons
+            document.querySelectorAll('.btn-take').forEach(button => {
+                button.addEventListener('click', function () {
+                    if (this.disabled) return;
+                    currentMedicineId = this.dataset.medId;
+                    noteModal.style.display = 'flex';
+                });
+            });
+        }
+
+        // --- Modal & Log Handler ---
+        modalCancel.addEventListener('click', () => {
+            noteModal.style.display = 'none';
+            noteTextarea.value = '';
+            currentMedicineId = null;
+        });
+
+        modalConfirm.addEventListener('click', async () => {
+            if (!currentMedicineId) return;
+            const payload = {
+                userId: user.id,
+                medicineId: currentMedicineId,
+                note: noteTextarea.value.trim()
+            };
+            try {
+                // ✅ FIXED: Using the full API_BASE_URL for the POST request
+                const response = await fetch(`${API_BASE_URL}/api/log`, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const result = await response.json();
+
+                if (response.ok) {
+                    fetchAndDisplayReminders(); // Refresh the list
+                } else {
+                    alert(`Error logging intake: ${result.message}`);
+                }
+            } catch (error) {
+                alert('Could not log intake due to a server error.');
+            } finally {
+                modalCancel.click();
+            }
+        });
+        
+        // Initial data load when the page loads
+        if (user && user.id) {
+             fetchAndDisplayReminders();
+        } 
+    });
+</script>
+
+    
+</body>
+
+</html>

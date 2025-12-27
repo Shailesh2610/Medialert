@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Home - MediAlert</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="/mainPage.html" class="nav-brand"><i class="fa-solid fa-pills"></i> MediAlert</a>
+            <div>
+                <a href="profile.html"><i class="fa-solid fa-user"></i> My Profile</a>
+                <a href="#" id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+            </div>
+        </div>
+    </nav>
+    <main class="container main-content">
+        <header class="page-header animated">
+            <h1 id="welcome-message">Welcome!</h1>
+            <p>"The greatest wealth is health."</p>
+        </header>
+        <div class="action-grid">
+            <a href="dashboard.html" class="card primary-action animated" style="animation-delay: 0.2s;">
+                <i class="fa-solid fa-calendar-day"></i>
+                <h2>View Today's Schedule</h2>
+                <p>See and log the medicines you need to take today.</p>
+            </a>
+            <a href="add-treatment.html" class="card animated" style="animation-delay: 0.4s;">
+                <i class="fa-solid fa-plus-circle"></i>
+                <h2>New Treatment Plan</h2>
+                <p>Set up a new course of medication with a start and end date.</p>
+            </a>
+            <a href="medical-history.html" class="card animated" style="animation-delay: 0.6s;">
+                <i class="fa-solid fa-book-medical"></i>
+                <h2>View Medical History</h2>
+                <p>Review your full medication log and illness history.</p>
+            </a>
+        </div>
+    </main>
+    <script>
+        });
+        
+    document.addEventListener("DOMContentLoaded", () => {
+        // 1. Check for logged-in user data
+        const userJSON = sessionStorage.getItem('medialert_user');
+
+            // Try to parse the user object
+            let user = null;
+            if (userJSON) {
+            try {
+                user = JSON.parse(userJSON);
+            } catch (e) {
+                console.error("Error parsing user data from sessionStorage:", e);
+            }
+        }
+
+            // 2. Authentication and Personalization Check
+            const welcomeMessageElement = document.getElementById('welcome-message');
+
+            if (!user || !user.id || !user.name) {
+                // If no valid user data is found, redirect them to login
+                alert("You must be logged in to view this page.");
+            // 💡 Uncomment the line below when you are ready to enforce login!
+            // window.location.href = 'login.html'; 
+
+            // Set a generic welcome message for now
+            welcomeMessageElement.textContent = `Welcome!`;
+
+        } else {
+                // Personalize the welcome message
+                welcomeMessageElement.textContent = `Welcome, ${user.name}!`;
+        }
+
+            // 3. Set up Logout Functionality
+            const logoutBtn = document.getElementById('logout-btn');
+        logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+            // Remove user data and session
+            sessionStorage.removeItem('medialert_user');
+            alert("You have been logged out.");
+            window.location.href = 'login.html'; // Redirect to login page
+        });
+    });
+    </script>
+</body>
+
+</html>
